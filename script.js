@@ -11,6 +11,8 @@ function addStudentData(student) {
     gpaElem.innerHTML = student.gpa
     let profileElem = document.getElementById('image')
     profileElem.setAttribute("src", student.image)
+    profileElem.classList.add('img-thumbnails')
+    profileElem.style.width = "7rem"
 }
 function addStudentToTable(index,student){
     const tableBody = document.getElementById('tableBody')
@@ -27,9 +29,8 @@ function addStudentToTable(index,student){
     cellbeforeImg.classList.add('img-fluid')
     let img = document.createElement('img')
     img.setAttribute('src',student.image)
-    img.height = 200
     img.classList.add('img-thumbnails')
-    img.style.width = "5rem"
+    img.style.width = "7rem"
     cellbeforeImg.appendChild(img)
     cell.appendChild(cellbeforeImg)
     row.appendChild(cell)
