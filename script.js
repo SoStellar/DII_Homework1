@@ -1,5 +1,7 @@
 var singleStudentResult = document.getElementById('single_student_result')
 var listStudentResult = document.getElementById('output')
+var addUserDetail = document.getElementById('addUserDetail')
+
 function addStudentData(student) {
     let idElem = document.getElementById('id')
     idElem.innerHTML = student.id
@@ -12,6 +14,7 @@ function addStudentData(student) {
     let profileElem = document.getElementById('image')
     profileElem.setAttribute("src", student.image)
 }
+
 function addStudentToTable(index,student){
     const tableBody = document.getElementById('tableBody')
     let row = document.createElement('tr')
@@ -36,6 +39,19 @@ function addStudentToTable(index,student){
     cell = document.createElement('td')
     cell.innerHTML = student.description
     row.appendChild(cell)
+    cell = document.createElement('td')
+    let button = document.createElement('button')
+    button.classList.add('btn')
+    button.classList.add('btn-danger')
+    button.setAttribute('type', 'button')
+    button.innerText = 'delete'
+    button.addEventListener('click', function(){ 
+        let cf = confirm(`ท่านต้องการลบคุณ ${student.name} หรือไม่`)
+        if(cf) {
+            deleteStudent(student.id)
+        }
+    })
+    cell.appendChild(button)
     row.addEventListener('click',function(){
         showStudentBlock(student)
     })
@@ -50,6 +66,53 @@ function addStudentList(studentList){
         addStudentToTable(counter++,student)
     }
 }
+function addStudentToDB(student){
+    fetch('https://dv-student-backend-2019.appspot.com/students',{
+        method: 'POST',
+        headers: {
+            'Content-Type' : 'application/json'
+        },
+        body:JSON.stringify(student)
+    }).then(response => {
+        if(response.status === 200){
+        return response.json()
+    }else{
+        throw Error(response.statusText)
+    }
+    }).then(data => {
+        console.log('success',data)
+        showAllStudents()
+    })
+}
+
+function deleteStudent(id){
+    fetch(`https://dv-student-backend-2019.appspot.com/student/${id}`,{
+        method: 'DELETE'
+    }).then(response =>{
+        if(response.status === 200){
+            return response.json()
+        }else{
+            throw Error(response.statusText)
+        }
+    }).then(data =>{
+        alert(`student name ${data.name} is now deleted`)
+        showAllStudents()
+    }).catch(error =>{
+        alert('your input student id is not in the database')
+    })
+}
+function onLoad(){
+    showAllStudentBlock()
+}
+function onAddStudentClick(){
+    let student = {}
+    student.name = document.getElementById('nameInput').value
+    student.surname = document.getElementById('surnameInput').value
+    student.studentId = document.getElementById('studentIdInput').value
+    student.gpa = document.getElementById('gpaInput').value
+    student.image = document.getElementById('imageLinkInput').value
+    addStudentToDB(student)
+}
 function showAllStudents(){
     fetch('https://dv-student-backend-2019.appspot.com/students')
     .then((response)=>{
@@ -58,14 +121,38 @@ function showAllStudents(){
         addStudentList(data)
     })
 }
+function hideAll(){
+    singleStudentResult.style.display='none'
+    listStudentResult.style.display='none'
+    addUserDetail.style.display='none'
+}
+document.getElementById('searchButton').addEventListener('click',() =>{
+    let id = document.getElementById('inputText').value
+    console.log(id)
+    fetch(`https://dv-student-backend-2019.appspot.com/student/${id}`)
+    .then(response =>{
+        return response.json()
+    }).then(student => {
+        showStudentBlock(student)
+    })
+})
+document.getElementById('allStudentMenu').addEventListener('click', (event) =>{
+    showAllStudentBlock(student)
+})
+document.getElementById('addStudentMenu').addEventListener('click',(event)=>{
+    hideAll()
+    addUserDetail.style.display = 'block'
+})
+document.getElementById('searchMenu').addEventListener('click',(event)=>{
+    
+})
 function showStudentBlock(student){
+    hideAll()
     singleStudentResult.style.display = 'block'
     addStudentData(student)
 }
 function showAllStudentBlock(student){
+    hideAll()
     listStudentResult.style.display = 'block'
     showAllStudents()
-}
-function onLoad(){
-    showAllStudentBlock()
 }
